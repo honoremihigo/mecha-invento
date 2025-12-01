@@ -88,7 +88,7 @@ const LoginPage = () => {
               <Package className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-            <p className="text-gray-600">Sign in to your ABY Inventory Admin dashboard</p>
+            <p className="text-gray-600">Sign in to your MECHA Inventory Admin dashboard</p>
           </div>
 
           {/* Error Message */}
@@ -153,9 +153,9 @@ const LoginPage = () => {
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
 
-              <label className="flex items-center">
+              {/* <label className="flex items-center">
              <Link to={'/auth'} className='underline text-blue-600 '>go back</Link>
-              </label>
+              </label> */}
              
             </div>
 

@@ -109,7 +109,7 @@ const Header = ({ onToggle, role }) => {
               <div className={`w-8 h-8 ${role === 'admin' ? 'bg-primary-600' : 'bg-blue-600'} rounded-lg lg:hidden flex items-center justify-center cursor-pointer`} onClick={onToggle}>
                 <Menu className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900">Welcome  Umusingi Hardware</h1>
+              <h1 className="text-xl font-bold text-gray-900">Welcome  Mecha Inventory</h1>
             </div>
           </div>
           

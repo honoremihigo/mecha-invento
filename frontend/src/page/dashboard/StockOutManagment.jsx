@@ -3,11 +3,9 @@ import { Search, Plus, Edit3, Trash2, ShoppingCart, DollarSign, Hash, User, Chec
 import stockOutService from '../../services/stockoutService';
 import stockInService from '../../services/stockinService';
 import UpsertStockOutModal from '../../components/dashboard/stockout/UpsertStockOutModal';
-// import DeleteModal from '../../components/dashboard/stockout/DeleteStockOutModal';
 import ViewStockOutModal from '../../components/dashboard/stockout/ViewStockOutModal';
 import useEmployeeAuth from '../../context/EmployeeAuthContext';
 import useAdminAuth from '../../context/AdminAuthContext';
-import InvoiceComponent from '../../components/dashboard/stockout/InvoiceComponent';
 
 const StockOutManagement = ({ role }) => {
   const [stockOuts, setStockOuts] = useState([]);
@@ -16,17 +14,13 @@ const StockOutManagement = ({ role }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  //   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedStockOut, setSelectedStockOut] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState(null);
-  const [isInvoiceNoteOpen,setIsInvoiceNoteOpen ] = useState(false)
-  const [transactionId,setTransactionId ] = useState(null)
 
-  const { user: employeeData } = useEmployeeAuth()
-  const { user: adminData } = useAdminAuth()
-
+  const { user: employeeData } = useEmployeeAuth();
+  const { user: adminData } = useAdminAuth();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,7 +56,7 @@ const StockOutManagement = ({ role }) => {
       stockOut.transactionId?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredStockOuts(filtered);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   }, [searchTerm, stockOuts]);
 
   // Pagination calculations
@@ -71,14 +65,12 @@ const StockOutManagement = ({ role }) => {
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredStockOuts.slice(startIndex, endIndex);
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-    // Adjust start page if we're near the end
     if (endPage - startPage < maxVisiblePages - 1) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
@@ -94,95 +86,50 @@ const StockOutManagement = ({ role }) => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const trId = params.get("transactionId");
+  const handleAddStockOut = async (stockOutData) => {
+    setIsLoading(true);
+    try {
+      const userInfo = {};
+      if (role === 'admin') {
+        userInfo.adminId = adminData.id;
+      }
+      if (role === 'employee') {
+        userInfo.employeeId = employeeData.id;
+      }
 
-    if (trId?.trim()) {
-      setTransactionId(trId)
-      setIsInvoiceNoteOpen(true);
+      let response;
+      if (stockOutData.salesArray && Array.isArray(stockOutData.salesArray)) {
+        response = await stockOutService.createMultipleStockOut(
+          stockOutData.salesArray,
+          stockOutData.clientInfo || {},
+          userInfo
+        );
+        showNotification(`Stock out transaction created successfully with ${stockOutData.salesArray.length} entries!`);
+      } else {
+        const singleEntryData = { ...stockOutData, ...userInfo };
+        response = await stockOutService.createStockOut(singleEntryData);
+        showNotification('Stock out entry added successfully!');
+      }
+
+      const updatedStockOuts = await stockOutService.getAllStockOuts();
+      setStockOuts(updatedStockOuts);
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error adding stock out:', error);
+      showNotification(`Failed to add stock out entry: ${error.message}`, 'error');
+    } finally {
+      setIsLoading(false);
     }
-  }, [])
-
-  
-  function updateSearchParam(key, value) {
-  const params = new URLSearchParams(window.location.search);
-
-  if (!value) {
-    // Remove the key if value is null, undefined, or empty string
-    params.delete(key);
-  } else {
-    // Add or update the key with the value
-    params.set(key, value);
-  }
-
-  const newUrl = `${window.location.pathname}?${params.toString()}`;
-  window.history.pushState({}, "", newUrl);
-}
-
-const handleCloseInvoiceModal = () => {
-  setIsInvoiceNoteOpen(false);
-  setTransactionId(null);
-  updateSearchParam("transactionId");
-};
-
-const handleAddStockOut = async (stockOutData) => {
-  setIsLoading(true);
-  try {
-    // Prepare user info
-    const userInfo = {};
-    if (role === 'admin') {
-      userInfo.adminId = adminData.id;
-    }
-    if (role === 'employee') {
-      userInfo.employeeId = employeeData.id;
-    }
-
-    // Check if it's multiple entries (new create mode) or single entry (legacy support)
-    if (stockOutData.salesArray && Array.isArray(stockOutData.salesArray)) {
-      // Multiple entries - use the new bulk create service
-     const response =  await stockOutService.createMultipleStockOut(
-        stockOutData.salesArray, 
-        stockOutData.clientInfo || {}, 
-        userInfo
-      );
-      updateSearchParam('transactionId',response.transactionId)
-      setTransactionId(response.transactionId); // ← set it right away
-setIsInvoiceNoteOpen(true);     
-      showNotification(`Stock out transaction created successfully with ${stockOutData.salesArray.length} entries!`);
-    } else {
-      // Single entry - use existing single create service
-      const singleEntryData = {
-        ...stockOutData,
-        ...userInfo
-      };
-      const  response = await stockOutService.createStockOut(singleEntryData);
-      updateSearchParam('transactionId',response.transactionId)
-      setTransactionId(response.transactionId); // ← set it right away
-setIsInvoiceNoteOpen(true);     
-      showNotification('Stock out entry added successfully!');
-    }
-
-    // Refresh the stock-out list
-    const updatedStockOuts = await stockOutService.getAllStockOuts();
-    setStockOuts(updatedStockOuts);
-    setIsAddModalOpen(false);
-  } catch (error) {
-    console.error('Error adding stock out:', error);
-    showNotification(`Failed to add stock out entry: ${error.message}`, 'error');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const handleEditStockOut = async (stockOutData) => {
     setIsLoading(true);
     try {
-      if(role == 'admin'){
-        stockOutData.adminId = adminData.id
+      if (role === 'admin') {
+        stockOutData.adminId = adminData.id;
       }
-      if (role == 'employee') {
-        stockOutData.employeeId = employeeData.id
+      if (role === 'employee') {
+        stockOutData.employeeId = employeeData.id;
       }
       await stockOutService.updateStockOut(selectedStockOut.id, stockOutData);
       const updatedStockOuts = await stockOutService.getAllStockOuts();
@@ -197,31 +144,10 @@ setIsInvoiceNoteOpen(true);
     }
   };
 
-
-  //   const handleDeleteStockOut = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       await stockOutService.deleteStockOut(selectedStockOut.id);
-  //       setStockOuts(prev => prev.filter(stock => stock.id !== selectedStockOut.id));
-  //       setIsDeleteModalOpen(false);
-  //       setSelectedStockOut(null);
-  //       showNotification('Stock out entry deleted successfully!');
-  //     } catch (error) {
-  //       showNotification(`Failed to delete stock out entry: ${error.message}`, 'error');
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
   const openEditModal = (stockOut) => {
     setSelectedStockOut(stockOut);
     setIsEditModalOpen(true);
   };
-
-  //   const openDeleteModal = (stockOut) => {
-  //     setSelectedStockOut(stockOut);
-  //     setIsDeleteModalOpen(true);
-  //   };
 
   const openViewModal = (stockOut) => {
     setSelectedStockOut(stockOut);
@@ -243,27 +169,13 @@ setIsInvoiceNoteOpen(true);
     }).format(price || 0);
   };
 
-
   // Pagination handlers
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
+  const handlePageChange = (page) => setCurrentPage(page);
+  const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+  const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
   const handleItemsPerPageChange = (newItemsPerPage) => {
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
   // Pagination Component
@@ -335,7 +247,7 @@ setIsInvoiceNoteOpen(true);
     </div>
   );
 
-  // Card View Component (Mobile/Tablet)
+  // Card View (Mobile)
   const CardView = () => (
     <div className="md:hidden">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
@@ -355,9 +267,6 @@ setIsInvoiceNoteOpen(true);
                       <div className="w-2 h-2 rounded-full bg-primary-500"></div>
                       <span className="text-xs text-gray-500">Sold</span>
                     </div>
-                    {stockOut.sku && (
-                      <span className="text-xs text-gray-500 font-mono">{stockOut.sku}</span>
-                    )}
                   </div>
                 </div>
                 <div className="flex gap-1">
@@ -391,7 +300,6 @@ setIsInvoiceNoteOpen(true);
                 )}
               </div>
 
-              {/* Client Information */}
               {(stockOut.clientName || stockOut.clientEmail || stockOut.clientPhone) && (
                 <div className="mb-4 p-3 bg-orange-50 rounded-lg">
                   <div className="text-sm font-medium text-gray-700 mb-2">Client</div>
@@ -426,15 +334,13 @@ setIsInvoiceNoteOpen(true);
           </div>
         ))}
       </div>
-
-      {/* Pagination for Cards */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <PaginationComponent showItemsPerPage={false} />
       </div>
     </div>
   );
 
-  // Table View Component (Desktop)
+  // Table View (Desktop)
   const TableView = () => (
     <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200">
       <div className="overflow-x-auto">
@@ -470,9 +376,6 @@ setIsInvoiceNoteOpen(true);
                       {stockOut.transactionId && (
                         <div className="text-xs text-gray-500 font-mono">{stockOut.transactionId}</div>
                       )}
-                      {stockOut.stockin?.product?.brand && (
-                        <div className="text-sm text-gray-500">{stockOut.stockin.product.brand}</div>
-                      )}
                     </div>
                   </div>
                 </td>
@@ -487,37 +390,26 @@ setIsInvoiceNoteOpen(true);
                           </span>
                         </div>
                       )}
-              
-                            </div>
+                    </div>
                   ) : (
                     <span className="text-sm text-gray-400">No client info</span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {stockOut.quantity ? (
-                    <div className="flex items-center gap-1">
-                      <Hash size={14} className="text-gray-400" />
-                      <span className="font-medium text-gray-900">{stockOut.quantity}</span>
-                    </div>
-                  ) : (
-                    <span className="text-sm text-gray-400">N/A</span>
-                  )}
+                  <div className="flex items-center gap-1">
+                    <Hash size={14} className="text-gray-400" />
+                    <span className="font-medium text-gray-900">{stockOut.quantity || 'N/A'}</span>
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {stockOut.soldPrice ? (
-                    <span className="font-medium text-gray-900">
-                      {formatPrice(stockOut.soldPrice)}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-gray-400">N/A</span>
-                  )}
+                  <span className="font-medium text-gray-900">
+                    {stockOut.soldPrice ? formatPrice(stockOut.soldPrice) : 'N/A'}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-1">
                     <Calendar size={14} className="text-gray-400" />
-                    <span className="text-sm text-gray-600">
-                      {formatDate(stockOut.createdAt)}
-                    </span>
+                    <span className="text-sm text-gray-600">{formatDate(stockOut.createdAt)}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -543,8 +435,6 @@ setIsInvoiceNoteOpen(true);
           </tbody>
         </table>
       </div>
-
-      {/* Table Pagination */}
       <PaginationComponent showItemsPerPage={false} />
     </div>
   );
@@ -558,7 +448,6 @@ setIsInvoiceNoteOpen(true);
           {notification.message}
         </div>
       )}
-      <InvoiceComponent isOpen={isInvoiceNoteOpen} onClose={handleCloseInvoiceModal} transactionId={transactionId} />
 
       <div className="h-full overflow-y-auto mx-auto">
         <div className="mb-8">
@@ -577,7 +466,7 @@ setIsInvoiceNoteOpen(true);
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by product, client, phone, or SKU..."
+                placeholder="Search by product, client, phone, or transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
@@ -644,17 +533,6 @@ setIsInvoiceNoteOpen(true);
           }}
           stockOut={selectedStockOut}
         />
-
-        {/* <DeleteModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => {
-            setIsDeleteModalOpen(false);
-            setSelectedStockOut(null);
-          }}
-          onConfirm={handleDeleteStockOut}
-          stockOut={selectedStockOut}
-          isLoading={isLoading}
-        /> */}
       </div>
     </div>
   );

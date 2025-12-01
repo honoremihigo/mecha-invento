@@ -193,7 +193,7 @@ const employeeItems = [
               <Package className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">ABY Inventory</h1>
+              <h1 className="text-xl font-semibold text-gray-900">mecha Inventory</h1>
               <p className="text-xs text-gray-500 capitalize">{role} Dashboard</p>
             </div>
           </div>
