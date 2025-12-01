@@ -17,8 +17,7 @@ app.enableCors({
     process.env.CORS_ORIGIN,
     'http://localhost:5173',
     'http://localhost:4173',
-    'https://abyinventory.com',
-    'https://www.abyinventory.com'  // Add this
+    'https://mecha-inventory-1.onrender.com',
   ].filter(Boolean),
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
