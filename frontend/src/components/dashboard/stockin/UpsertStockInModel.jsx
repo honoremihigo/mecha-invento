@@ -12,7 +12,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
     purchases: []
   });
 
-    const formatCurrency = (amount) => {
+  const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'RWF'
@@ -324,23 +324,25 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">{title}</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           
           {isUpdateMode ? (
             // Single entry form for update mode
             <>
               {/* Product Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Product <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.productId}
                   onChange={handleProductChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                  className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                     validationErrors.productId
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-300 focus:ring-blue-500'
@@ -360,7 +362,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
 
               {/* Quantity */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Quantity <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -368,7 +370,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                   value={formData.quantity}
                   onChange={handleQuantityChange}
                   min="1"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                  className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                     validationErrors.quantity
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-300 focus:ring-blue-500'
@@ -382,7 +384,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
 
               {/* Price per Unit */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Price per Unit <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -391,7 +393,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                   value={formData.price}
                   onChange={handlePriceChange}
                   min="0"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                  className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                     validationErrors.price
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-300 focus:ring-blue-500'
@@ -405,7 +407,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
 
               {/* Selling Price */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Selling Price <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -414,7 +416,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                   value={formData.sellingPrice}
                   onChange={handleSellingPriceChange}
                   min="0"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                  className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                     validationErrors.sellingPrice
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-300 focus:ring-blue-500'
@@ -437,50 +439,57 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
 
               {/* Supplier */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Supplier
                 </label>
                 <input
                   type="text"
                   value={formData.supplier}
                   onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter supplier name (optional)"
                 />
               </div>
             </>
           ) : (
             // Multiple entries form for create mode
-            <div className="min-h-[50vh] max-h-96 overflow-y-auto">
-              <div className="mb-4">
-                <h3 className="text-lg font-medium text-gray-800">Stock Purchases</h3>
+            <div className="max-h-[50vh] sm:max-h-96 overflow-y-auto">
+              <div className="mb-3 sm:mb-4 flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800">Stock Purchases</h3>
+                <button
+                  type="button"
+                  onClick={addPurchase}
+                  className="px-3 py-1.5 text-xs sm:text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  + Add Purchase
+                </button>
               </div>
 
               {formData.purchases.map((purchase, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-700">Purchase #{index + 1}</h4>
+                <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                  <div className="flex justify-between items-center mb-2 sm:mb-3">
+                    <h4 className="text-sm sm:text-base font-medium text-gray-700">Purchase #{index + 1}</h4>
                     {formData.purchases.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removePurchase(index)}
-                        className="text-red-500 hover:text-red-700 text-sm"
+                        className="text-red-500 hover:text-red-700 text-xs sm:text-sm"
                       >
                         Remove
                       </button>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+                  <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-6 sm:gap-3">
                     {/* Product Selection */}
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                         Product <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={purchase.productId}
                         onChange={(e) => handlePurchaseChange(index, 'productId', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                        className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                           validationErrors.purchases[index]?.productId
                             ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
@@ -500,22 +509,23 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                       )}
                     </div>
 
-                        {/* Supplier */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Supplier
-                          </label>
-                          <input
-                            type="text"
-                            value={purchase.supplier}
-                            onChange={(e) => handlePurchaseChange(index, 'supplier', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter supplier name (optional)"
-                          />
-                        </div>
+                    {/* Supplier */}
+                    <div className="sm:col-span-2 lg:col-span-1">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        Supplier
+                      </label>
+                      <input
+                        type="text"
+                        value={purchase.supplier}
+                        onChange={(e) => handlePurchaseChange(index, 'supplier', e.target.value)}
+                        className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Supplier (optional)"
+                      />
+                    </div>
+
                     {/* Quantity */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                         Quantity <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -523,12 +533,12 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                         value={purchase.quantity}
                         onChange={(e) => handlePurchaseChange(index, 'quantity', e.target.value)}
                         min="1"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                        className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                           validationErrors.purchases[index]?.quantity
                             ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
                         }`}
-                        placeholder="Enter quantity"
+                        placeholder="Qty"
                       />
                       {validationErrors.purchases[index]?.quantity && (
                         <p className="text-red-500 text-xs mt-1">
@@ -539,11 +549,10 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
 
                     {/* Price per Unit */}
                     <div>
-                      <label className="md:hidden text-sm font-medium text-gray-700 mb-1">
-                        Price <span className="text-red-500">*</span>
-                      </label>
-                      <label className=" hidden md:block text-sm font-medium text-gray-700 mb-1">
-                        Price per Unit <span className="text-red-500">*</span>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        <span className="lg:hidden">Price</span>
+                        <span className="hidden lg:inline">Price/Unit</span>
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="number"
@@ -551,12 +560,12 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                         value={purchase.price}
                         onChange={(e) => handlePurchaseChange(index, 'price', e.target.value)}
                         min="0"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                        className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                           validationErrors.purchases[index]?.price
                             ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
                         }`}
-                        placeholder="Enter price per unit"
+                        placeholder="Price"
                       />
                       {validationErrors.purchases[index]?.price && (
                         <p className="text-red-500 text-xs mt-1">
@@ -567,8 +576,10 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
 
                     {/* Selling Price */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Selling Price <span className="text-red-500">*</span>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                        <span className="lg:hidden">Selling</span>
+                        <span className="hidden lg:inline">Selling Price</span>
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="number"
@@ -576,12 +587,12 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                         value={purchase.sellingPrice}
                         onChange={(e) => handlePurchaseChange(index, 'sellingPrice', e.target.value)}
                         min="0"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 ${
+                        className={`w-full px-2 sm:px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 ${
                           validationErrors.purchases[index]?.sellingPrice
                             ? 'border-red-300 focus:ring-red-500'
                             : 'border-gray-300 focus:ring-blue-500'
                         }`}
-                        placeholder="Enter selling price"
+                        placeholder="Selling"
                       />
                       {validationErrors.purchases[index]?.sellingPrice && (
                         <p className="text-red-500 text-xs mt-1">
@@ -594,24 +605,23 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          Profit margin: {((Number(purchase.sellingPrice) - Number(purchase.price)) / Number(purchase.price) * 100).toFixed(1)}%
+                          Margin: {((Number(purchase.sellingPrice) - Number(purchase.price)) / Number(purchase.price) * 100).toFixed(1)}%
                         </p>
                       )}
                     </div>
-
                   </div>
 
                   {/* Purchase Summary */}
                   {purchase.quantity && purchase.price && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-center text-sm">
+                    <div className="mt-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                      <div className="flex justify-between items-center text-xs sm:text-sm">
                         <span className="font-medium text-gray-700">Total Cost:</span>
                         <span className="font-bold text-blue-600">
                           {formatCurrency((Number(purchase.quantity) * Number(purchase.price)).toFixed(2))}
                         </span>
                       </div>
                       {purchase.sellingPrice && (
-                        <div className="flex justify-between items-center text-sm mt-1">
+                        <div className="flex justify-between items-center text-xs sm:text-sm mt-1">
                           <span className="font-medium text-gray-700">Potential Revenue:</span>
                           <span className="font-bold text-green-600">
                             {formatCurrency((Number(purchase.quantity) * Number(purchase.sellingPrice)).toFixed(2))}
@@ -622,24 +632,22 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
                   )}
                 </div>
               ))}
-
-            
             </div>
           )}
 
           {/* Form Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !isFormValid()}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Processing...' : stockIn ? 'Update' : `Create ${formData.purchases?.length || 1} Purchase${formData.purchases?.length > 1 ? 's' : ''}`}
             </button>
@@ -647,7 +655,7 @@ const UpsertStockInModal = ({ isOpen, onClose, onSubmit, stockIn, products, isLo
         </form>
 
         {/* Help Text */}
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg">
           <p className="text-xs text-blue-700">
             <strong>Required fields:</strong> Product, Quantity, Price per Unit, and Selling Price are required for each purchase.
             <br />

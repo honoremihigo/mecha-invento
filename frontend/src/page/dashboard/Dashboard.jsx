@@ -100,7 +100,7 @@ const Dashboard = () => {
       setDashboardData(data);
 
       if (summary) {
-        calculateStats(summary);
+        calculateStats(summary, data);
       } else {
         calculateStatsFromData(data);
       }
@@ -116,7 +116,16 @@ const Dashboard = () => {
     }
   };
 
-  const calculateStats = (summary) => {
+  const calculateStats = (summary, data) => {
+    // Calculate total monetary values
+    const totalStockInAmount = data.stockIns.reduce((sum, item) => 
+      sum + ((item.price || 0) * (item.quantity || 0)), 0
+    );
+    
+    const totalStockOutAmount = data.stockOuts.reduce((sum, item) => 
+      sum + ((item.soldPrice || 0) * (item.quantity || 0)), 0
+    );
+
     const newStats = [
       {
         title: 'Total Products',
@@ -133,22 +142,6 @@ const Dashboard = () => {
         change: `${summary.lowStock.filter(item => item.stock <= 0).length} out of stock`,
         color: 'text-amber-600',
         bgColor: 'bg-amber-50'
-      },
-      // {
-      //   title: 'Total Stock Out',
-      //   value: summary.totalStockOut.toString(),
-      //   icon: ArrowDownRight,
-      //   change: `${summary.totalSalesReturns} sales returns`,
-      //   color: 'text-green-600',
-      //   bgColor: 'bg-green-50'
-      // },
-      {
-        title: 'Total Employees',
-        value: summary.totalEmployees.toString(),
-        icon: UserCheck,
-        change: `${summary.totalCategories} categories`,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-50'
       },
       {
         title: 'Total Categories',
@@ -167,20 +160,20 @@ const Dashboard = () => {
         bgColor: 'bg-emerald-50'
       },
       {
-        title: 'Total Stock In',
-        value: summary.totalStockIn.toString(),
-        icon: Box,
-        change: `Most stocked: ${summary.mostStockedInProduct?.name || 'N/A'}`,
+        title: 'Total Stock In Amount',
+        value: formatPrice(totalStockInAmount),
+        icon: DollarSign,
+        change: `${summary.totalStockIn} items purchased`,
         color: 'text-cyan-600',
         bgColor: 'bg-cyan-50'
       },
       {
-        title: 'Sales Returns',
-        value: summary.totalSalesReturns.toString(),
-        icon: RefreshCw,
-        change: `${summary.totalStockOut} total stock out`,
-        color: 'text-rose-600',
-        bgColor: 'bg-rose-50'
+        title: 'Total Stock Out Amount',
+        value: formatPrice(totalStockOutAmount),
+        icon: DollarSign,
+        change: `${summary.totalStockOut || 0} items sold`,
+        color: 'text-green-600',
+        bgColor: 'bg-green-50'
       }
     ];
     setStats(newStats);
@@ -193,6 +186,15 @@ const Dashboard = () => {
     const totalStockIn = data.stockIns.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const totalStockOut = data.stockOuts.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const totalSalesReturns = data.salesReturns.length;
+
+    // Calculate total monetary values
+    const totalStockInAmount = data.stockIns.reduce((sum, item) => 
+      sum + ((item.price || 0) * (item.quantity || 0)), 0
+    );
+    
+    const totalStockOutAmount = data.stockOuts.reduce((sum, item) => 
+      sum + ((item.soldPrice || 0) * (item.quantity || 0)), 0
+    );
 
     const lowStock = data.stockIns.filter(item => item.quantity <= 5);
 
@@ -214,20 +216,20 @@ const Dashboard = () => {
         bgColor: 'bg-amber-50'
       },
       {
-        title: 'Total Stock Out',
-        value: totalStockOut.toString(),
-        icon: ArrowDownRight,
-        change: `${totalSalesReturns} sales returns`,
-        color: 'text-green-600',
-        bgColor: 'bg-green-50'
+        title: 'Total Stock In Amount',
+        value: formatPrice(totalStockInAmount),
+        icon: DollarSign,
+        change: `${totalStockIn} items purchased`,
+        color: 'text-cyan-600',
+        bgColor: 'bg-cyan-50'
       },
       {
-        title: 'Total Employees',
-        value: totalEmployees.toString(),
-        icon: UserCheck,
-        change: `${totalCategories} categories`,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-50'
+        title: 'Total Stock Out Amount',
+        value: formatPrice(totalStockOutAmount),
+        icon: DollarSign,
+        change: `${totalStockOut} items sold`,
+        color: 'text-green-600',
+        bgColor: 'bg-green-50'
       }
     ]);
   };
@@ -397,13 +399,12 @@ const Dashboard = () => {
       }
     }
     
-    console.log('Chart data prepared:', periods); // Debug log
+    console.log('Chart data prepared:', periods);
     setChartData(periods);
   };
 
   const handlePeriodChange = (period) => {
     setSelectedPeriod(period);
-    // The useEffect will handle the data update
   };
 
   const getPeriodLabel = () => {
@@ -436,6 +437,15 @@ const Dashboard = () => {
     return 'Just now';
   };
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'RWF',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -459,7 +469,7 @@ const Dashboard = () => {
       </div>
 
       <main className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {stats.map((stat, index) => (
             <div key={index} className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">

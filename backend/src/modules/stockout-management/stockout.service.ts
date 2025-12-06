@@ -21,6 +21,7 @@ export class StockoutService {
   sales: {
     stockinId: string;
     quantity: number;
+    soldPrice: number;
   }[];
   clientName?: string;
   clientEmail?: string;
@@ -36,11 +37,11 @@ export class StockoutService {
     throw new BadRequestException('At least one sale is required');
   }
 
-  const transactionId = generateStockSKU('abyride','transaction') ;
+  const transactionId = generateStockSKU('mechainventory','transaction') ;
   const createdStockouts: Awaited<ReturnType<typeof this.prisma.stockOut.create>>[] = [];
 
   for (const sale of sales) {
-    const { stockinId, quantity } = sale;
+    const { stockinId, quantity, soldPrice } = sale;
 
     const stockin = await this.prisma.stockIn.findUnique({
       where: { id: stockinId },
@@ -48,6 +49,10 @@ export class StockoutService {
 
     if (!stockin) {
       throw new NotFoundException(`Stockin not found for ID: ${stockinId}`);
+    }
+
+    if(soldPrice === null || soldPrice === undefined){
+      throw new BadRequestException(`Sold price not set for stockin ID: ${stockinId}`);
     }
 
     if (stockin.quantity === null || stockin.quantity === undefined) {
@@ -58,9 +63,6 @@ export class StockoutService {
       throw new BadRequestException(`Not enough stock for product with ID: ${stockinId}`);
     }
 
-    if (stockin.sellingPrice === null || stockin.sellingPrice === undefined) {
-      throw new BadRequestException(`Selling price not set for stockin ID: ${stockinId}`);
-    }
 
     const updatedStock = await this.prisma.stockIn.update({
       where: { id: stockinId },
@@ -69,13 +71,13 @@ export class StockoutService {
       },
     });
 
-    const soldPrice = stockin.sellingPrice * quantity;
+    const finalAmount = soldPrice * quantity;
 
     const newStockout = await this.prisma.stockOut.create({
       data: {
         stockinId,
         quantity,
-        soldPrice,
+        soldPrice: soldPrice,
         clientName,
         clientEmail,
         clientPhone,
@@ -87,7 +89,7 @@ export class StockoutService {
     });
 
     createdStockouts.push(newStockout);
-    await generateAndSaveBarcodeImage(String(transactionId))
+    // await generateAndSaveBarcodeImage(String(transactionId))
   }
 
   // Track activity once for the entire transaction
